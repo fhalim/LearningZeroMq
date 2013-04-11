@@ -51,20 +51,26 @@
     <Reference Include="clrzmq">
       <HintPath>..\lib\clrzmq.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\lib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="xunit">
       <HintPath>..\lib\xunit.dll</HintPath>
     </Reference>
+    <Reference Include="ZooKeeperNet">
+      <HintPath>..\lib\ZooKeeperNet.dll</HintPath>
+    </Reference>
+    <Reference Include="ZooKeeperNet.Recipes">
+      <HintPath>..\lib\ZooKeeperNet.Recipes.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExamplesTests.cs" />
+    <Compile Include="PubSubTests.cs" />
+    <Compile Include="RequestResponseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ZookeeperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libzmq.dll">

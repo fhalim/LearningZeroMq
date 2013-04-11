@@ -7,7 +7,7 @@
     using Xunit;
     using ZeroMQ;
 
-    public class ExamplesTests
+    public class RequestResponseTests
     {
         [Fact]
         public void Example1()
