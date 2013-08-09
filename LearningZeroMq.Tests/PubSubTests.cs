@@ -15,6 +15,7 @@
         public void TestPubSub()
         {
             var maxClients = 5;
+            var messagesPerClient = 10;
             var clientsStarted = new CountdownEvent(maxClients);
             var srv = Task.Factory.StartNew(() => {
                                                 using (var ctx = ZmqContext.Create())
@@ -23,18 +24,18 @@
                                                     clientsStarted.Wait(TimeSpan.FromSeconds(maxClients));
                                                     foreach (var i in Enumerable.Range(1, maxClients)) {
                                                         sock.Send(i.ToString(CultureInfo.CurrentCulture), Encoding.UTF8);
-                                                        Console.WriteLine("Sent message");
+                                                        Console.WriteLine("Sent message " + i);
                                                     }
                                                 }
                                             });
-            var evt = new CountdownEvent(maxClients);
-            var subscribers = Enumerable.Range(1, maxClients).Select(e => CreateSubscriber(evt, clientsStarted)).ToArray();
+            var clientReceivedMessage = new CountdownEvent(maxClients * messagesPerClient);
+            var subscribers = Enumerable.Range(1, maxClients).Select(e => CreateSubscriber(clientReceivedMessage, clientsStarted)).ToArray();
             srv.Wait(TimeSpan.FromSeconds(10));
             Assert.True(srv.IsCompleted, "Server should have completed");
-            evt.Wait(TimeSpan.FromSeconds(10));
-            Assert.True(evt.IsSet, "All subscribers should have gotten a copy of the message");
+            clientReceivedMessage.Wait(TimeSpan.FromSeconds(10));
+            Assert.True(clientReceivedMessage.IsSet, "All subscribers should have gotten a copy of the message");
         }
-        private static Task CreateSubscriber(CountdownEvent serverResponded, CountdownEvent clientsStarted)
+        private static Task CreateSubscriber(CountdownEvent receivedMessage, CountdownEvent clientsStarted)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -45,10 +46,11 @@
                     socket.Connect("tcp://localhost:5555");
                     clientsStarted.Signal();
                     Console.WriteLine("Connected");
-                    var replyMsg = socket.Receive(Encoding.UTF8);
-                    Console.WriteLine("Received: " + replyMsg +
-                        Environment.NewLine);
-                    serverResponded.Signal();
+                    while (true) {
+                        var replyMsg = socket.Receive(Encoding.UTF8);
+                        Console.WriteLine("[{0}] Received: {1}", Thread.CurrentThread.ManagedThreadId, replyMsg);
+                        receivedMessage.Signal();
+                    }
                 }
             });
         }
